@@ -37,10 +37,17 @@ import TreeLogo from './components/TreeLogo.vue';
 
 const App = Vue.extend({
   components: { TreeLogo },
-  data: () => ({ searchInput: '' }),
+  data: () => ({ searchInput: '', result: null }),
   methods: {
-    onClick() {
-      console.log(this.searchInput);
+    async onClick() {
+      const response = await fetch(
+        `/.netlify/functions/fetchTrefle?q=${this.searchInput}`,
+      );
+
+      const data = await response.json();
+
+      // console.log(data);
+      this.result = data;
     },
     onChange(value: string) {
       this.searchInput = value;
