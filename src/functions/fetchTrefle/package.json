@@ -1,19 +1,16 @@
 {
-  "name": "node-fetch",
+  "name": "fetchTrefle",
   "version": "1.0.0",
-  "description": "netlify functions:create - default template for node fetch function",
-  "main": "node-fetch.js",
+  "description": "",
+  "main": "fetchTrefle.js",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "netlify",
-    "serverless",
-    "js"
-  ],
-  "author": "Netlify",
-  "license": "MIT",
-  "dependencies": {
-    "node-fetch": "^2.3.0"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
