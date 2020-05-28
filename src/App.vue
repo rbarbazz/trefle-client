@@ -8,21 +8,47 @@
             class="ml-auto"
             cols="12"
             justify="start"
-            style="max-width: 300px; margin: auto;"
+            style="margin: auto;"
           >
             <TreeLogo style="margin-bottom: 20px;" />
-            <v-text-field
-              @input="onChange"
-              append-icon="mdi-magnify"
-              color="#41b913"
-              label="Solo"
-              placeholder="Search for a plant..."
-              solo
+            <v-form @submit.prevent="onClick">
+              <v-text-field
+                @input="onChange"
+                append-icon="mdi-magnify"
+                color="#41b913"
+                label="Solo"
+                placeholder="Search for a plant..."
+                solo
+                style="max-width: 300px;"
+              >
+              </v-text-field>
+              <v-btn
+                type="submit"
+                color="#41b913"
+                style="color: white;"
+                :loading="isLoading"
+                >Search</v-btn
+              >
+            </v-form>
+            <v-card
+              :key="result.scientific_name"
+              max-width="500"
+              style="margin: 1rem 0;"
+              v-for="result in results"
             >
-            </v-text-field>
-            <v-btn @click="onClick" color="#41b913" style="color: white;"
-              >Search</v-btn
-            >
+              <v-card-title>
+                {{ result.scientific_name }}
+              </v-card-title>
+              <v-card-subtitle
+                v-if="result.common_name"
+                class="text-left text-capitalize"
+              >
+                {{ result.common_name }}
+              </v-card-subtitle>
+              <v-card-text v-if="result.family_common_name" class="text-left">
+                {{ result.family_common_name }}
+              </v-card-text>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>
@@ -37,17 +63,18 @@ import TreeLogo from './components/TreeLogo.vue';
 
 const App = Vue.extend({
   components: { TreeLogo },
-  data: () => ({ searchInput: '', result: null }),
+  data: () => ({ isLoading: false, searchInput: '', results: null }),
   methods: {
     async onClick() {
+      this.isLoading = true;
       const response = await fetch(
         `/.netlify/functions/fetchTrefle?q=${this.searchInput}`,
       );
 
       const data = await response.json();
 
-      // console.log(data);
-      this.result = data;
+      this.isLoading = false;
+      this.results = data;
     },
     onChange(value: string) {
       this.searchInput = value;
