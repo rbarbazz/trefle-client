@@ -36,18 +36,30 @@
               style="margin: 1rem 0;"
               v-for="result in results"
             >
-              <v-card-title>
-                {{ result.scientific_name }}
-              </v-card-title>
-              <v-card-subtitle
-                v-if="result.common_name"
-                class="text-left text-capitalize"
-              >
-                {{ result.common_name }}
-              </v-card-subtitle>
-              <v-card-text v-if="result.family_common_name" class="text-left">
-                {{ result.family_common_name }}
-              </v-card-text>
+              <v-container>
+                <v-row justify="space-between">
+                  <v-col cols="6">
+                    <v-card-title class="text-left">
+                      {{ result.scientific_name }}
+                    </v-card-title>
+                    <v-card-subtitle
+                      v-if="result.common_name"
+                      class="text-left text-capitalize"
+                    >
+                      {{ result.common_name }}
+                    </v-card-subtitle>
+                    <v-card-text
+                      v-if="result.family_common_name"
+                      class="text-left"
+                    >
+                      {{ result.family_common_name }}
+                    </v-card-text>
+                  </v-col>
+                  <v-col cols="6">
+                    <v-img :src="result.thumbnailURL"></v-img>
+                  </v-col>
+                </v-row>
+              </v-container>
             </v-card>
           </v-col>
         </v-row>
@@ -59,11 +71,23 @@
 <script lang="ts">
 import Vue from 'vue';
 
+import { fetchWikipediaThumbnail } from './fetchWikipediaThumbnail';
 import TreeLogo from './components/TreeLogo.vue';
+
+interface PlantResult {
+  common_name: string;
+  family_common_name: string;
+  scientific_name: string;
+  [key: string]: string;
+}
 
 const App = Vue.extend({
   components: { TreeLogo },
-  data: () => ({ isLoading: false, searchInput: '', results: null }),
+  data: () => ({
+    isLoading: false,
+    searchInput: '',
+    results: [] as PlantResult[],
+  }),
   methods: {
     async onClick() {
       this.isLoading = true;
@@ -71,10 +95,25 @@ const App = Vue.extend({
         `/.netlify/functions/fetchTrefle?q=${this.searchInput}`,
       );
 
-      const data = await response.json();
+      const data: PlantResult[] = await response.json();
+      const results = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        data.map(
+          async (plant: PlantResult): Promise<PlantResult> => {
+            const thumbnailURL = await fetchWikipediaThumbnail(
+              `${plant.scientific_name
+                .split(' ')
+                .slice(0, 2)
+                .join(' ')}`,
+            );
+
+            return { ...plant, thumbnailURL };
+          },
+        ),
+      );
 
       this.isLoading = false;
-      this.results = data;
+      this.results = results;
     },
     onChange(value: string) {
       this.searchInput = value;
